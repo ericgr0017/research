@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — V1
+
+### M5 — Polish, walkthrough, missing-field detection
+- Toast notification system (Zustand store + bottom-right Toaster) for non-blocking errors and signals.
+- API errors now surface `detail` (the underlying server message) underneath the headline error on the Live Call brief and Daily Queue panels.
+- "TEST MODE" pill in the header so the operator always knows which mode they're in.
+- Brief generation cool-down: a meeting whose background brief generation just failed isn't retried for 5 minutes, so a missing API key or wrong region doesn't hammer Anthropic on every queue poll.
+- Missing-field detection in `McpZohoClient`: Zoho "field not found" responses are wrapped as `MissingZohoFieldError` with the field name so the UI can tell the operator exactly what to add in Zoho Setup.
+- Sign-out is now non-blocking: a backend failure no longer traps the user; local cleanup runs either way.
+- React Router future flags opted in (`v7_startTransition`, `v7_relativeSplatPath`) to silence dev console warnings.
+- README gains a five-minute walkthrough section and a "what test mode actually does" section.
+
+## Pre-1.0 milestones
 
 ### M4 — Decision view and Outcome Agent
 - Decision view at `/call/:id/decision` reads transcript via router state, shows the school-name prompt, optional notes, and two large buttons.

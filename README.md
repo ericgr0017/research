@@ -80,9 +80,45 @@ zai-console/
   .env.example
   tsconfig.base.json
   shared/               # types shared by frontend and backend
-  backend/              # Fastify server, ZohoClient, agents
+  backend/              # Fastify server, ZohoClient, agents, retry queue
   frontend/             # Vite/React app
 ```
+
+## Five-minute walkthrough for a new interviewer
+
+This is what an interviewer sees on day one.
+
+**1. Sign in.** Open `http://localhost:5173`. You will land on the sign-in screen. Pick your name from the dropdown. There is no password. The dropdown is populated from `ALLOWED_USERS` in `.env`.
+
+**2. Look at today's queue.** You will see one card per scheduled interview for today. Each card shows the executive's name, title, company, the school they would be advising, the research topic, and whether the prep brief is ready or still generating. The header shows how many interviews are scheduled and how many you have completed. The queue refreshes itself every 60 seconds and you can also hit Refresh.
+
+**3. Take the call.** When it is time for an interview, click "Take call" on that card. You will land on the Live Call view. The left side shows the executive's prep brief (three short paragraphs of plain-language background). The right side shows the five interview questions, with the current one highlighted, and a transcript pane below. A timer at the bottom of the screen counts up from when you took the call.
+
+**4. Conduct the interview.** Read or skim the brief while you wait for the executive to join. Use the questions on the right as a guide. Click "Next question" to advance the highlight as you move through them. Type or paste the transcript into the text area as the conversation goes. The order of questions is a suggestion, not a script.
+
+**5. End the call.** When the interview is over, click "End call" at the bottom right. You will land on the Decision screen.
+
+**6. Make the call.** The Decision screen asks one question: was this person substantive, professional, and a fit for the school's advisory community? You have two buttons: "Send invitation" or "Do not send." The buttons are disabled for 60 seconds after the screen loads (5 seconds in test mode) so you have time to think before clicking. There is an optional notes field that gets saved either way. Click your choice.
+
+**7. Move on.** Behind the scenes the system updates Zoho, sends the thank-you email, and (for "Send invitation") writes a research insight summary back to the meeting record. The screen briefly shows the result and then takes you straight to the next interview on your queue. If a step failed, the system records it for a background retry and tells you so. You move on either way. You do not have to wait.
+
+That is the whole flow. If something looks wrong, contact Stephene.
+
+## What test mode actually does
+
+When `TEST_MODE=true`:
+
+- All Zoho reads and writes go to an in-memory mock seeded with four sample meetings for "today." Mutations are logged to the backend console. Restarting the backend resets the data.
+- All Gmail sends are printed to the backend console instead of going out. The console output shows exactly what would have been sent.
+- The Anthropic API still runs for real if `ANTHROPIC_API_KEY` is set. This means real prep briefs, real thank-you emails, and real research insights, all visible without touching production data. If the key is not set, the agent steps fail gracefully and a one-line error appears in the UI with a retry button.
+- The Decision view's 60-second cooldown drops to 5 seconds so you can iterate quickly.
+- A "TEST MODE" pill shows in the header so it is always obvious which mode you are in.
+
+When `TEST_MODE=false`:
+
+- Reads and writes go to the real Zaiserver MCP gateway against production Zoho. Make sure the custom fields above exist first.
+- Emails go through the real Gmail MCP.
+- The Anthropic API key is required.
 
 ## Build status
 

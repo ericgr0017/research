@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { PrepBrief, ScheduledMeeting } from "@zai/shared";
-import type { ZohoClient } from "./ZohoClient.js";
+import { MissingZohoFieldError, type ZohoClient } from "./ZohoClient.js";
 
 const ZOHO_SERVER_ID = "zoho-crm-data-metadata";
 const GATEWAY_TOOL = "zschool_zoho_call_tool";
@@ -66,6 +66,14 @@ export class McpZohoClient implements ZohoClient {
 
     if (result.isError) {
       const detail = result.content.map((c) => c.text ?? "").join("\n");
+      // Detect Zoho's "field not found" responses and surface them as our typed
+      // error so the route handler can give the operator a precise message
+      // about which custom field needs to be added in Zoho Setup.
+      const fieldMatch = detail.match(/(?:invalid|unknown|no such)[^"']*["']?(\w+)["']?/i);
+      if (fieldMatch && /field|column/i.test(detail)) {
+        const moduleArg = (args.arguments as { module?: string }).module ?? "Zoho";
+        throw new MissingZohoFieldError(fieldMatch[1] ?? "unknown", moduleArg);
+      }
       throw new Error(`Zaiserver tool call failed: ${detail}`);
     }
 

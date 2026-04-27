@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ScheduledMeeting, SessionUser } from "@zai/shared";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api/client.js";
+import { api, ApiError } from "../api/client.js";
 import { AppHeader } from "../components/AppHeader.js";
 
 interface TodayResponse {
@@ -43,6 +43,11 @@ export const DailyQueuePage = (): React.ReactElement => {
         {today.isError && (
           <div className="text-red-700">
             <p>{(today.error as Error).message}</p>
+            {today.error instanceof ApiError && today.error.detail && (
+              <p className="text-xs text-muted mt-1 font-mono break-words">
+                {today.error.detail}
+              </p>
+            )}
             <button
               onClick={handleRefresh}
               className="mt-3 text-sm underline hover:no-underline"

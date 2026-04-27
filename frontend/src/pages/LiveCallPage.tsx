@@ -3,6 +3,7 @@ import type { PrepBrief, ScheduledMeeting } from "@zai/shared";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api/client.js";
+import { useToasts } from "../store/toasts.js";
 import { useTestMode } from "../api/session.js";
 import { AppHeader } from "../components/AppHeader.js";
 
@@ -142,6 +143,11 @@ export const LiveCallPage = (): React.ReactElement => {
             {brief.isError && (
               <div className="text-red-700">
                 <p>{(brief.error as Error).message}</p>
+                {brief.error instanceof ApiError && brief.error.detail && (
+                  <p className="text-xs text-muted mt-1 font-mono break-words">
+                    {brief.error.detail}
+                  </p>
+                )}
                 <button
                   onClick={() => brief.refetch()}
                   className="mt-2 text-sm underline hover:no-underline"

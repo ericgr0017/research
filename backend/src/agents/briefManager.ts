@@ -5,6 +5,11 @@ import { getZohoClient } from "../zoho/createZohoClient.js";
 // In-flight set so we never start two prep generations for the same meeting.
 const inFlight = new Map<string, Promise<void>>();
 
+// Cool-down on recently failed generations so a missing API key (or any other
+// persistent failure) doesn't get retried every 60s on each queue poll.
+const recentFailures = new Map<string, number>();
+const FAILURE_COOLDOWN_MS = 5 * 60 * 1000;
+
 export const isBriefInFlight = (meetingId: string): boolean => inFlight.has(meetingId);
 
 const generateAndSave = async (meeting: ScheduledMeeting): Promise<void> => {
@@ -26,8 +31,14 @@ const generateAndSave = async (meeting: ScheduledMeeting): Promise<void> => {
 export const ensureBriefInBackground = (meeting: ScheduledMeeting): void => {
   if (meeting.has_brief) return;
   if (inFlight.has(meeting.id)) return;
+  const failedAt = recentFailures.get(meeting.id);
+  if (failedAt && Date.now() - failedAt < FAILURE_COOLDOWN_MS) return;
   const promise = generateAndSave(meeting)
+    .then(() => {
+      recentFailures.delete(meeting.id);
+    })
     .catch((err) => {
+      recentFailures.set(meeting.id, Date.now());
       console.error(`[PrepAgent] background generation failed for ${meeting.id}:`, err);
     })
     .finally(() => {
