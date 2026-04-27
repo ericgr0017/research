@@ -1,9 +1,10 @@
-import type { ScheduledMeeting } from "@zai/shared";
+import type { PrepBrief, ScheduledMeeting } from "@zai/shared";
 
 // Stable demo fixtures. Four meetings scheduled today, owned by the first
 // interviewer in ALLOWED_USERS so the Daily Queue has something to render
 // the moment the app boots in TEST_MODE. One is already decided so the
-// completed-count badge is non-zero.
+// completed-count badge is non-zero. One has a pre-seeded brief so the Live
+// Call view renders instantly without burning Anthropic credits during demos.
 //
 // We read the interviewer id from env at fixture build time, defaulting to
 // "demo-interviewer-1" so the app still works before .env is filled in.
@@ -88,5 +89,21 @@ export const fixtureMeetings = (): ScheduledMeeting[] => [
     },
     school: { id: "fix-school-003", name: "NYU Stern Brand Council" },
     has_brief: false,
+  },
+];
+
+export const fixtureBriefs = (): PrepBrief[] => [
+  {
+    meeting_id: "fix-meeting-002",
+    brief_text:
+      "Marcus Weld stepped down as CFO of Tessera Industrial last spring after eleven years. His finance group ran a roughly seven-billion-dollar balance sheet through two recessions, an activist investor episode, and a major divestiture. He is best known internally for moving Tessera off rolling forecasts and into a quarterly capital-reset model, which other industrial CFOs have tried to copy with mixed results.\n\nRight now he is doing board work and quiet advisory. He has been vocal in private settings about how most operators are still planning as if rates will normalize, and he thinks that is a mistake. He has written one Substack post on this topic but otherwise keeps a low public profile. He responds to specifics, not abstractions, and has limited patience for finance-as-strategy framings.\n\nThe Wharton Finance Advisory Board cares about how senior CFOs actually allocate capital under uncertainty, not the textbook version. Weld is a good fit because he has lived through the version that hurts.",
+    questions: [
+      "Walk me through the most recent capital allocation decision at Tessera that you would do differently if you had it back. What information was missing in the room?",
+      "You moved Tessera off rolling forecasts. What broke first when you did that, and what did the operating teams need from finance that they were not getting before?",
+      "How do you think about the difference between a CFO planning for higher rates and a CFO planning for permanently uncertain rates? Where does that change the math?",
+      "When you look at peers running industrial balance sheets right now, where do you see the most expensive blind spot?",
+      "If you were advising a younger CFO heading into their first downturn in the seat, what is the one habit you would tell them to build in the first sixty days?",
+    ],
+    generated_at: new Date().toISOString(),
   },
 ];

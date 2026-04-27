@@ -1,17 +1,21 @@
-import type { ScheduledMeeting } from "@zai/shared";
-import { fixtureMeetings } from "../testMode/fixtures.js";
+import type { PrepBrief, ScheduledMeeting } from "@zai/shared";
+import { fixtureBriefs, fixtureMeetings } from "../testMode/fixtures.js";
 import type { ZohoClient } from "./ZohoClient.js";
 
 // In-memory store seeded from fixtures. Mutations stay in process memory and
 // reset on every restart, which is what we want for development and demos.
 export class MockZohoClient implements ZohoClient {
   private readonly meetings = new Map<string, ScheduledMeeting>();
+  private readonly briefs = new Map<string, PrepBrief>();
   private readonly contactPatches = new Map<string, Record<string, unknown>>();
   private readonly meetingPatches = new Map<string, Record<string, unknown>>();
 
   constructor() {
     for (const m of fixtureMeetings()) {
       this.meetings.set(m.id, structuredClone(m));
+    }
+    for (const b of fixtureBriefs()) {
+      this.briefs.set(b.meeting_id, structuredClone(b));
     }
   }
 
@@ -35,13 +39,23 @@ export class MockZohoClient implements ZohoClient {
     return m ? structuredClone(m) : null;
   }
 
+  async getBrief(meetingId: string): Promise<PrepBrief | null> {
+    const b = this.briefs.get(meetingId);
+    return b ? structuredClone(b) : null;
+  }
+
+  async saveBrief(brief: PrepBrief): Promise<void> {
+    this.briefs.set(brief.meeting_id, structuredClone(brief));
+    const meeting = this.meetings.get(brief.meeting_id);
+    if (meeting) meeting.has_brief = true;
+    console.log(`[MockZoho] saveBrief ${brief.meeting_id}`);
+  }
+
   async updateMeeting(id: string, fields: Record<string, unknown>): Promise<void> {
     const existing = this.meetingPatches.get(id) ?? {};
     this.meetingPatches.set(id, { ...existing, ...fields });
     console.log(`[MockZoho] updateMeeting ${id}`, fields);
 
-    // Mirror common fields back into the in-memory record so the queue reflects
-    // post-decision state on the next poll.
     const meeting = this.meetings.get(id);
     if (meeting && typeof fields["Interview_Decision"] === "string") {
       meeting.interview_decision = fields["Interview_Decision"] as ScheduledMeeting["interview_decision"];

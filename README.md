@@ -46,6 +46,8 @@ The frontend never talks to Zoho, Gmail, Anthropic, or Calendly directly. Every 
 
 Set `TEST_MODE=true` in `.env` to use built-in fake Zoho data and skip real email sending. The Anthropic API still runs for real, so you see real prep briefs and real generated emails (printed to the backend console). This is the recommended mode while you're building or demoing.
 
+To exercise the Prep Agent end to end, set `ANTHROPIC_API_KEY`. Without it, meetings that don't have a pre-seeded brief will show "Could not load brief" with a retry button. One fixture meeting (Marcus Weld) ships with a pre-seeded brief so you can demo the Live Call view without burning Anthropic credits.
+
 Set `TEST_MODE=false` once Zoho and the LUX-A email template are wired in.
 
 ## Custom Zoho fields you must add manually

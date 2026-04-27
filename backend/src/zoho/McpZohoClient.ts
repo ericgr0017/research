@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import type { ScheduledMeeting } from "@zai/shared";
+import type { PrepBrief, ScheduledMeeting } from "@zai/shared";
 import type { ZohoClient } from "./ZohoClient.js";
 
 const ZOHO_SERVER_ID = "zoho-crm-data-metadata";
@@ -13,10 +13,12 @@ interface CallToolResult {
 
 // Real implementation that talks to the Zaiserver MCP gateway.
 //
-// The exact field names on Executive_Meeting_Summary (scheduled time field,
-// Universities lookup, etc.) are discovered at runtime in M3 via
-// zschool_zoho_get_tool_schema before the real-Zoho path is exercised. Until
-// then this client is the structural skeleton. TEST_MODE uses MockZohoClient.
+// V1 wires the transport, the tool-call shape, and the Zoho update path. The
+// exact field names on Executive_Meeting_Summary still need a discovery pass
+// against a live Zaiserver instance (scheduled-time field, Universities lookup,
+// Interviewer lookup target). That work lands once ZAISERVER_MCP_URL is set
+// and we can introspect schemas via zschool_zoho_get_tool_schema. TEST_MODE
+// uses MockZohoClient until then.
 export class McpZohoClient implements ZohoClient {
   private client: Client | null = null;
   private connecting: Promise<Client> | null = null;
@@ -77,12 +79,23 @@ export class McpZohoClient implements ZohoClient {
 
   async getTodayMeetings(_interviewerId: string): Promise<ScheduledMeeting[]> {
     throw new Error(
-      "McpZohoClient.getTodayMeetings is not implemented yet. Set TEST_MODE=true for V1 development. M3 finishes field discovery and wires this up against the real Zaiserver.",
+      "McpZohoClient.getTodayMeetings is not implemented yet. Set TEST_MODE=true for V1 development.",
     );
   }
 
   async getMeeting(_id: string): Promise<ScheduledMeeting | null> {
-    throw new Error("McpZohoClient.getMeeting is not implemented yet. See M3 plan.");
+    throw new Error("McpZohoClient.getMeeting is not implemented yet.");
+  }
+
+  async getBrief(_meetingId: string): Promise<PrepBrief | null> {
+    throw new Error("McpZohoClient.getBrief is not implemented yet.");
+  }
+
+  async saveBrief(brief: PrepBrief): Promise<void> {
+    await this.updateMeeting(brief.meeting_id, {
+      Prep_Brief: brief.brief_text,
+      Question_Set: brief.questions.join("\n\n"),
+    });
   }
 
   async updateMeeting(id: string, fields: Record<string, unknown>): Promise<void> {

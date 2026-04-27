@@ -4,7 +4,13 @@ import { api } from "./client.js";
 
 export interface WhoamiResponse {
   user: SessionUser | null;
+  test_mode: boolean;
 }
+
+export const useTestMode = (): boolean => {
+  const whoami = useWhoami();
+  return whoami.data?.test_mode ?? false;
+};
 
 export const WHOAMI_KEY = ["whoami"] as const;
 
@@ -17,5 +23,9 @@ export const useWhoami = () =>
 
 export const useSetSessionUser = (): ((user: SessionUser | null) => void) => {
   const qc = useQueryClient();
-  return (user) => qc.setQueryData<WhoamiResponse>(WHOAMI_KEY, { user });
+  return (user) =>
+    qc.setQueryData<WhoamiResponse>(WHOAMI_KEY, (prev) => ({
+      user,
+      test_mode: prev?.test_mode ?? false,
+    }));
 };

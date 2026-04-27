@@ -8,7 +8,7 @@ const signInSchema = z.object({
 
 export const authRoutes = async (app: FastifyInstance): Promise<void> => {
   app.get("/api/auth/whoami", async (request) => {
-    return { user: request.session.user ?? null };
+    return { user: request.session.user ?? null, test_mode: config.testMode };
   });
 
   // V1 sign-in is a dropdown over the ALLOWED_USERS env list. There is no

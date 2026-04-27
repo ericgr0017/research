@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { RequireAuth } from "./components/RequireAuth.js";
-import { CallPlaceholderPage } from "./pages/CallPlaceholderPage.js";
 import { DailyQueuePage } from "./pages/DailyQueuePage.js";
+import { LiveCallPage } from "./pages/LiveCallPage.js";
 import { SignInPage } from "./pages/SignInPage.js";
 
 export const App = (): React.ReactElement => (
@@ -10,7 +10,7 @@ export const App = (): React.ReactElement => (
       <Route path="/sign-in" element={<SignInPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/" element={<DailyQueuePage />} />
-        <Route path="/call/:id" element={<CallPlaceholderPage />} />
+        <Route path="/call/:id" element={<LiveCallPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
