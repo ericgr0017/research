@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### M4 — Decision view and Outcome Agent
+- Decision view at `/call/:id/decision` reads transcript via router state, shows the school-name prompt, optional notes, and two large buttons.
+- 60s cooldown before buttons enable. Drops to 5s when `TEST_MODE=true` so dev cycles aren't slow.
+- Outcome Agent runs the five-step sequence per spec, with idempotent step handling and a per-step success/failure record on the response.
+- Failed runs go to a SQLite-backed retry queue at `backend/.data/outcome-retries.db`. A 30s background worker retries due jobs, with exponential backoff capped at 10 attempts.
+- Email composer uses Anthropic with separate placeholder system prompts for `Send Invitation` and `Do Not Send`. Real LUX-A template plugs in here later.
+- Research insight extractor pulls one paragraph from the transcript on `Send Invitation` only.
+- Gmail client interface with `MockGmailClient` (formatted console print) and `McpGmailClient` skeleton for the real gateway.
+- Auto-advance: after a decision, the queue refetches and the operator is taken straight to the next pending meeting (or back to the queue if there is none).
+
 ### M3 — Prep Agent and Live Call view
 - Anthropic SDK wired with `ANTHROPIC_MODEL` from env (defaults to `claude-sonnet-4-5`).
 - Prep Agent uses tool-forcing for structured output (`submit_brief` tool), returning the 90-second brief and exactly five tailored questions.

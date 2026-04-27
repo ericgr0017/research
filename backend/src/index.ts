@@ -2,9 +2,11 @@ import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import session from "@fastify/session";
 import Fastify from "fastify";
+import { startRetryWorker } from "./agents/outcomeAgent.js";
 import { config } from "./config.js";
 import "./session.js";
 import { authRoutes } from "./routes/auth.js";
+import { decisionRoutes } from "./routes/decision.js";
 import { healthRoutes } from "./routes/health.js";
 import { meetingsRoutes } from "./routes/meetings.js";
 
@@ -37,9 +39,11 @@ const start = async (): Promise<void> => {
   await app.register(healthRoutes);
   await app.register(authRoutes);
   await app.register(meetingsRoutes);
+  await app.register(decisionRoutes);
 
   try {
     await app.listen({ port: config.port, host: "0.0.0.0" });
+    startRetryWorker();
     app.log.info(
       `ZAI Console backend ready. test_mode=${config.testMode}, allowed_users=${config.allowedUsers.length}`,
     );
