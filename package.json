@@ -1,0 +1,22 @@
+{
+  "name": "zai-console",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ZAI Research Interview Console",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w @zai/backend\" \"npm run dev -w @zai/frontend\"",
+    "build": "npm run build -w @zai/shared && npm run build -w @zai/backend && npm run build -w @zai/frontend",
+    "typecheck": "npm run typecheck -w @zai/shared && npm run typecheck -w @zai/backend && npm run typecheck -w @zai/frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
