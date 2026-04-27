@@ -15,7 +15,7 @@ export class MockZohoClient implements ZohoClient {
     }
   }
 
-  async searchTodayMeetings(interviewerId: string): Promise<ScheduledMeeting[]> {
+  async getTodayMeetings(interviewerId: string): Promise<ScheduledMeeting[]> {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date();
@@ -23,7 +23,6 @@ export class MockZohoClient implements ZohoClient {
 
     return [...this.meetings.values()]
       .filter((m) => m.interviewer_id === interviewerId)
-      .filter((m) => m.interview_decision === "Pending")
       .filter((m) => {
         const t = new Date(m.scheduled_time).getTime();
         return t >= startOfDay.getTime() && t <= endOfDay.getTime();
@@ -40,6 +39,13 @@ export class MockZohoClient implements ZohoClient {
     const existing = this.meetingPatches.get(id) ?? {};
     this.meetingPatches.set(id, { ...existing, ...fields });
     console.log(`[MockZoho] updateMeeting ${id}`, fields);
+
+    // Mirror common fields back into the in-memory record so the queue reflects
+    // post-decision state on the next poll.
+    const meeting = this.meetings.get(id);
+    if (meeting && typeof fields["Interview_Decision"] === "string") {
+      meeting.interview_decision = fields["Interview_Decision"] as ScheduledMeeting["interview_decision"];
+    }
   }
 
   async updateContact(id: string, fields: Record<string, unknown>): Promise<void> {

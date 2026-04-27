@@ -1,6 +1,10 @@
+import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
+import session from "@fastify/session";
 import Fastify from "fastify";
 import { config } from "./config.js";
+import "./session.js";
+import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
 import { meetingsRoutes } from "./routes/meetings.js";
 
@@ -17,7 +21,21 @@ const start = async (): Promise<void> => {
     credentials: true,
   });
 
+  await app.register(cookie);
+  await app.register(session, {
+    secret: config.sessionSecret,
+    cookieName: "zai_session",
+    cookie: {
+      httpOnly: true,
+      secure: false, // dev only; flip when we deploy behind https
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 8, // 8 hours
+    },
+    saveUninitialized: false,
+  });
+
   await app.register(healthRoutes);
+  await app.register(authRoutes);
   await app.register(meetingsRoutes);
 
   try {

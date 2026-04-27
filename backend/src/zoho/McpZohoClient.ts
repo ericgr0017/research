@@ -13,11 +13,10 @@ interface CallToolResult {
 
 // Real implementation that talks to the Zaiserver MCP gateway.
 //
-// V1 wires the transport and the tool-call shape. The exact field names on
-// Executive_Meeting_Summary (scheduled time field, Universities lookup, etc.)
-// are discovered at runtime in M2 via zschool_zoho_get_tool_schema before the
-// real-Zoho path is exercised. Until then this client is the structural
-// skeleton and points at TODOs where field mapping has to land.
+// The exact field names on Executive_Meeting_Summary (scheduled time field,
+// Universities lookup, etc.) are discovered at runtime in M3 via
+// zschool_zoho_get_tool_schema before the real-Zoho path is exercised. Until
+// then this client is the structural skeleton. TEST_MODE uses MockZohoClient.
 export class McpZohoClient implements ZohoClient {
   private client: Client | null = null;
   private connecting: Promise<Client> | null = null;
@@ -76,18 +75,14 @@ export class McpZohoClient implements ZohoClient {
     }
   }
 
-  async searchTodayMeetings(_interviewerId: string): Promise<ScheduledMeeting[]> {
-    // TODO(M2): discover the actual scheduled-time field name and Universities
-    // lookup via zschool_zoho_get_tool_schema, build a COQL query, map to
-    // ScheduledMeeting. Until then this path is intentionally not callable in
-    // production. TEST_MODE uses MockZohoClient.
+  async getTodayMeetings(_interviewerId: string): Promise<ScheduledMeeting[]> {
     throw new Error(
-      "McpZohoClient.searchTodayMeetings is not implemented yet. Set TEST_MODE=true for V1 development, or finish field discovery in M2.",
+      "McpZohoClient.getTodayMeetings is not implemented yet. Set TEST_MODE=true for V1 development. M3 finishes field discovery and wires this up against the real Zaiserver.",
     );
   }
 
   async getMeeting(_id: string): Promise<ScheduledMeeting | null> {
-    throw new Error("McpZohoClient.getMeeting is not implemented yet. See M2 plan.");
+    throw new Error("McpZohoClient.getMeeting is not implemented yet. See M3 plan.");
   }
 
   async updateMeeting(id: string, fields: Record<string, unknown>): Promise<void> {

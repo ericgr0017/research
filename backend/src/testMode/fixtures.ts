@@ -1,8 +1,9 @@
 import type { ScheduledMeeting } from "@zai/shared";
 
-// Stable demo fixtures. Three meetings scheduled today, owned by the first
+// Stable demo fixtures. Four meetings scheduled today, owned by the first
 // interviewer in ALLOWED_USERS so the Daily Queue has something to render
-// the moment the app boots in TEST_MODE.
+// the moment the app boots in TEST_MODE. One is already decided so the
+// completed-count badge is non-zero.
 //
 // We read the interviewer id from env at fixture build time, defaulting to
 // "demo-interviewer-1" so the app still works before .env is filled in.
@@ -24,6 +25,22 @@ const todayAt = (hours: number, minutes = 0): string => {
 };
 
 export const fixtureMeetings = (): ScheduledMeeting[] => [
+  {
+    id: "fix-meeting-000",
+    scheduled_time: todayAt(8, 30),
+    research_topic: "Operating models for cross-border supply chains",
+    interview_decision: "Send Invitation",
+    interviewer_id: interviewerId,
+    contact: {
+      id: "fix-contact-000",
+      name: "James Okafor",
+      title: "Former COO",
+      company: "Continental Logistics",
+      linkedin_url: null,
+    },
+    school: { id: "fix-school-000", name: "MIT Sloan Operations Council" },
+    has_brief: true,
+  },
   {
     id: "fix-meeting-001",
     scheduled_time: todayAt(10, 0),

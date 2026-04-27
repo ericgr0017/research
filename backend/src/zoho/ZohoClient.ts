@@ -4,7 +4,9 @@ import type { ScheduledMeeting } from "@zai/shared";
 // The two implementations are MockZohoClient (TEST_MODE fixtures) and
 // McpZohoClient (real Zaiserver gateway).
 export interface ZohoClient {
-  searchTodayMeetings(interviewerId: string): Promise<ScheduledMeeting[]>;
+  // Returns every meeting scheduled for today for the given interviewer,
+  // regardless of decision state. Callers filter and count as needed.
+  getTodayMeetings(interviewerId: string): Promise<ScheduledMeeting[]>;
   getMeeting(id: string): Promise<ScheduledMeeting | null>;
   updateMeeting(id: string, fields: Record<string, unknown>): Promise<void>;
   updateContact(id: string, fields: Record<string, unknown>): Promise<void>;
