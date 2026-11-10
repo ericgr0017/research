@@ -36,7 +36,7 @@ export const config = {
   ),
   anthropic: {
     apiKey: optional("ANTHROPIC_API_KEY"),
-    model: optional("ANTHROPIC_MODEL", "claude-sonnet-4-5"),
+    model: optional("ANTHROPIC_MODEL", "claude-sonnet-5-5"),
   },
   zaiserverMcpUrl: optional("ZAISERVER_MCP_URL"),
   gmailMcpUrl: optional("GMAIL_MCP_URL"),
